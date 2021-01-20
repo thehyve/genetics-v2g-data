@@ -110,7 +110,7 @@ rule javierre2016_to_parquet:
     input:
         data=[tmpdir + '/interval/pchic/javierre2016/{version}/{cell}/processed_b38.tsv.gz'.format(
             version=version, cell=cell_type) for cell_type in cell_types],
-        cell_map = GSRemoteProvider().remote(config['cell_map'], keep_local=False, immediate_close=True)
+        cell_map = config['cell_map']
     output:
         directory(config['out_dir'] + '/interval/pchic/javierre2016/{version}/data.parquet')
     shell:
