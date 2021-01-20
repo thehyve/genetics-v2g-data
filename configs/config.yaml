@@ -2,8 +2,12 @@
 temp_dir: 'tmp'
 out_dir: 'output'
 
+# V2G staging
+andersson2014: v2g_input/andersson2014/enhancer_tss_associations.bed
+gene_dictionary: lut/gene_dictionary.json
+
 # Tissue name to ontology maps
-cell_map: gs://genetics-portal-data/lut/biofeature_lut_190328.json
+cell_map: lut/biofeature_lut_190328.json
 
 # Interval Liftover
 chain_grch37_to_grch38: grch37_to_grch38.over.chain.gz

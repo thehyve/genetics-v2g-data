@@ -1,5 +1,4 @@
 #!/usr/bin/env snakemake
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 import pandas as pd
 from pprint import pprint
 from datetime import date
@@ -36,8 +35,7 @@ rule andersson2014_download:
     ''' Retrieves Andersson et al 2014 Fantom5
     '''
     input:
-        GSRemoteProvider().remote('gs://genetics-portal-input/v2g_input/andersson2014/enhancer_tss_associations.bed',
-                                    keep_local=False)
+        config['andersson2014']
     output:
         tmpdir + '/interval/fantom5/andersson2014/aggregate/enhancer_tss_associations.bed'
     shell:
@@ -48,8 +46,7 @@ rule andersson2014_format:
     '''
     input:
         bed = tmpdir + '/interval/fantom5/andersson2014/aggregate/enhancer_tss_associations.bed',
-        gtf = GSRemoteProvider().remote('gs://genetics-portal-data/lut/gene_dictionary.json',
-                                        keep_local=False)
+        gtf = config['gene_dictionary']
     output:
         tmpdir + '/interval/fantom5/andersson2014/{version}/data_b37.tsv.gz'
     shell:
