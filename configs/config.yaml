@@ -5,6 +5,7 @@ out_dir: 'output'
 # V2G staging
 andersson2014: v2g_input/andersson2014/enhancer_tss_associations.bed
 thurman2012: v2g_input/thurman2012/genomewideCorrs_above0.7_promoterPlusMinus500kb_withGeneNames_32celltypeCategories.bed8.gz
+javierre2016: v2g_input/javierre2016
 gene_dictionary: lut/gene_dictionary.json
 
 # Tissue name to ontology maps

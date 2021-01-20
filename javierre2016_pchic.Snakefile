@@ -1,8 +1,8 @@
 #!/usr/bin/env snakemake
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 import pandas as pd
 from pprint import pprint
 from datetime import date
+import os
 
 # Load configuration
 configfile: "configs/config.yaml"
@@ -14,7 +14,7 @@ targets = []
 # Make targets for Javierre 2016 PCHiC
 
 # Get list of cell line names
-cell_types,  = GSRemoteProvider().glob_wildcards('gs://genetics-portal-input/v2g_input/javierre2016/{samples}.merged_samples_12Apr2015_full.txt.gz')
+cell_types,  = glob_wildcards(os.path.join(config['javierre2016'], '{samples}.merged_samples_12Apr2015_full.txt.gz'))
 
 # # DEBUG
 # print("WARNING! Only running 1 cell type")
@@ -42,8 +42,7 @@ rule javierre2016_download:
     ''' Retrieves Javierre 2016 PCHiC file from the ebi FTP
     '''
     input:
-        GSRemoteProvider().remote('gs://genetics-portal-input/v2g_input/javierre2016/{cell}.merged_samples_12Apr2015_full.txt.gz',
-                                   keep_local=False, immediate_close=True)
+        os.path.join(config['javierre2016'],'{cell}.merged_samples_12Apr2015_full.txt.gz')
     output:
         tmpdir + '/interval/pchic/javierre2016/{version}/{cell}/raw.gz'
     shell:
