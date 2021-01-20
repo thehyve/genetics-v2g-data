@@ -1,5 +1,4 @@
 #!/usr/bin/env snakemake
-from snakemake.remote.GS import RemoteProvider as GSRemoteProvider
 import pandas as pd
 from pprint import pprint
 from datetime import date
@@ -36,8 +35,7 @@ rule thurman2012_download:
     ''' Retrieves DHS correlation data from the Ensembl ENCODE FTP
     '''
     input:
-        GSRemoteProvider().remote('gs://genetics-portal-input/v2g_input/thurman2012/genomewideCorrs_above0.7_promoterPlusMinus500kb_withGeneNames_32celltypeCategories.bed8.gz',
-                                    keep_local=False)
+        config['thurman2012']
     output:
         tmpdir + '/interval/dhscor/thurman2012/unspecified/dhs_correlations.bed.gz'
     shell:
