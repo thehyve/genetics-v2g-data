@@ -4,39 +4,19 @@
 # Ed Mountjoy
 #
 
-'''
-# Set SPARK_HOME and PYTHONPATH to use 2.4.0
-export PYSPARK_SUBMIT_ARGS="--driver-memory 8g pyspark-shell"
-export SPARK_HOME=/Users/em21/software/spark-2.4.0-bin-hadoop2.7
-export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-2.4.0-src.zip:$PYTHONPATH
-'''
-
-import os
-import sys
 import pyspark.sql
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
-from functools import reduce
 from datetime import date
+import argparse
 
-def main():
-
-    # Args
-    in_path = 'gs://genetics-portal-dev-sumstats/filtered/pvalue_0.005/molecular_trait/220330'
-    outf = 'gs://genetics-portal-dev-staging/v2g/qtl/{version}'.format(
-        version=date.today().strftime("%y%m%d")
-    )
-
-    # # Args (test)
-    # in_path = 'tmp/part-00000-1a32ece0-aba4-42f2-b9b6-963e49610fba-c000.json'
-    # outf = 'tmp/qtl/{version}'.format(
-    #     version=date.today().strftime("%y%m%d")
-    # )
+def main(in_path, out_path):
 
     # Make spark session
     global spark
     spark = (
         pyspark.sql.SparkSession.builder
+        .config("spark.driver.memory", "8g")
         .getOrCreate()
     )
     print('Spark version: ', spark.version)
@@ -53,8 +33,7 @@ def main():
     # Hack the columns to fit the current structure
     hack = (
         df
-        .withColumn('source', col('type_id'))
-        .withColumnRenamed('type_id', 'type')
+        .withColumn('source', col('type'))
         .withColumn('feature', concat_ws('-', col('study_id'), col('bio_feature')))
         .withColumnRenamed('gene_id', 'ensembl_id')
         .withColumnRenamed('ref', 'other_allele')
@@ -76,7 +55,7 @@ def main():
         hack
         .write
         .parquet(
-            outf,
+            f"{out_path}/qtl.parquet",
             mode='overwrite'
         )
     )
@@ -87,7 +66,7 @@ def main():
         .select('source', 'feature')
         .drop_duplicates()
         .toPandas()
-        .to_json(outf + '.feature_list.json', orient='records', lines=True)
+        .to_json(f"{out_path}/qtl.feature_list.json", orient='records', lines=True)
     )
 
 
@@ -96,4 +75,19 @@ def main():
 
 if __name__ == '__main__':
 
-    main()
+    # Parsing command line arguments
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description='This script reformats QTL studies for ingestion in V2G.')
+    parser.add_argument('--input', help='QTLs from sumstats to parquet step',
+                        type=str, required=True)
+    parser.add_argument('--output', help='Output parquet QTLs for V2G',
+                        type=str, required=True)
+
+    args = parser.parse_args()
+
+    # Args
+    in_path = args.input
+    out_path = args.output
+
+    main(in_path, out_path)
