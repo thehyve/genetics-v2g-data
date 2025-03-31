@@ -11,17 +11,18 @@ from datetime import date
 import argparse
 import os
 
-def list_all_files(directory, batch_prefix=""):
+def list_all_files(directory, batch_dirs):
     file_paths = []
     for root, _, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
             if file_path.endswith('.parquet') and "/output/sumstats" in file_path:
-                if batch_prefix in file_path:
-                    file_paths.append(file_path)
+                for batch in batch_dirs:
+                    if batch in file_path:
+                        file_paths.append(file_path)
     return file_paths
 
-def main(in_path, out_path, batch_prefix):
+def main(in_path, out_path, batch_dirs):
 
     # Make spark session
     global spark
@@ -33,7 +34,7 @@ def main(in_path, out_path, batch_prefix):
     print('Spark version: ', spark.version)
 
     # Get list of all parquet files
-    parquet_list = list_all_files(in_path, batch_prefix)
+    parquet_list = list_all_files(in_path, batch_dirs)
     assert len(parquet_list) > 0, f"No parquet files found in {in_path}"
 
     # Load datasets
@@ -98,14 +99,14 @@ if __name__ == '__main__':
                         type=str, required=True)
     parser.add_argument('--output', help='Output parquet QTLs for V2G',
                         type=str, required=True)
-    parser.add_argument('--prefix', help='Batch prefix with QTLs',
-                        type=str, required=True)
+    parser.add_argument('--batches', help='Batch directory names with QTLs',
+                        type=str, required=True, nargs='+')
 
     args = parser.parse_args()
 
     # Args
     in_path = args.input
     out_path = args.output
-    batch_prefix = args.prefix
+    batch_dirs = args.batches
 
-    main(in_path, out_path, batch_prefix)
+    main(in_path, out_path, batch_dirs)
