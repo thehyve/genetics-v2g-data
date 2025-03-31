@@ -100,13 +100,13 @@ if __name__ == '__main__':
     parser.add_argument('--output', help='Output parquet QTLs for V2G',
                         type=str, required=True)
     parser.add_argument('--batches', help='Batch directory names with QTLs',
-                        type=str, required=True, nargs='+')
+                        type=str, required=True)
 
     args = parser.parse_args()
 
     # Args
     in_path = args.input
     out_path = args.output
-    batch_dirs = args.batches
+    batch_dirs = args.batches.split(',')
 
     main(in_path, out_path, batch_dirs)
