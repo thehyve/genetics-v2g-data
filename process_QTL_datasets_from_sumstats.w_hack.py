@@ -9,6 +9,15 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from datetime import date
 import argparse
+import os
+
+def list_all_files(directory):
+    file_paths = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.parquet'):
+                file_paths.append(os.path.join(root, file))
+    return file_paths
 
 def main(in_path, out_path):
 
@@ -21,8 +30,12 @@ def main(in_path, out_path):
     )
     print('Spark version: ', spark.version)
 
+    # Get list of all parquet files
+    parquet_list = list_all_files(in_path)
+    assert len(parquet_list) > 0, f"No parquet files found in {in_path}"
+
     # Load datasets
-    df = spark.read.parquet(in_path)
+    df = spark.read.parquet(*parquet_list)
 
     # Filter based on bonferonni correction of number of tests per gene
     df = df.filter(col('pval') <= (0.05 / col('num_tests')))
